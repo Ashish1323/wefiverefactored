@@ -2,7 +2,7 @@ let express= require("express");
 let router=express.Router();
 const { body, validationResult } = require('express-validator');
 let {signout,signup,signin,isSignedIn}=require("../controllers/auth")
-
+let {forgot,generateToken,resetPassword}=require("../controllers/auth")
 //signup
 router.post("/signup",[
     body('email').isEmail().withMessage('Enter A Email'),
@@ -19,5 +19,10 @@ router.post("/signin",[
     body('email').isEmail().withMessage('Enter A Email'),
     body('password').isLength({ min: 1 }).withMessage(' Password should not be empty'),
 ],signin)
+
+router.get('/reset/:token',generateToken)
+
+router.post('/forgot',forgot)
+router.post('/reset/:token',resetPassword)
 
 module.exports= router;
