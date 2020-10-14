@@ -1,4 +1,5 @@
 const User = require("../models/user")
+const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator');
 var jwt = require('jsonwebtoken');
 var expressJwt = require('express-jwt');
@@ -137,7 +138,7 @@ exports.isSignedIn = expressJwt({
     ], function(err) {
       if (err) return next(err);
       res.json({
-          "err":"mail not sent"
+          "err":"mail sent"
       });
     });
   };
@@ -157,56 +158,122 @@ exports.isSignedIn = expressJwt({
     });
   };
   
-  
-  
-  exports.resetPassword=(req, res)=> {
-      console.log("madarchod",req.params.token)
-    async.waterfall([
-      function(done) {
-        User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, function(err, user) {
-          if (!user) {
-            return res.redirect('back');
+  var smtpTransport = nodemailer.createTransport({
+    service: process.env.MAILER_SERVICE_PROVIDER || 'Gmail',
+    auth: {
+                user: 'wefivehelper@gmail.com',
+                pass: 'wefive12345'
           }
-          if(req.body.password == req.body.confirm) {
-            user.setPassword(req.body.password, function(err) {
-              user.resetPasswordToken = undefined;
-              user.resetPasswordExpires = undefined;
-  
-              user.save(function(err) {
-                req.logIn(user, function(err) {
-                  done(err, user);
-                });
+  });
+
+  exports.resetPassword = function(req, res, next) {
+    console.log("madar", req.params.token)
+    User.findOne({
+      resetPasswordToken: req.params.token,
+      resetPasswordExpires: {
+        $gt: Date.now()
+      }
+    }).exec(function(err, user) {
+      console.log(user)
+      if (!err && user) {
+        if (req.body.password === req.body.confirm) {
+          // user.encry_password = bcrypt.hashSync(req.body.password, 10);
+          // console.log(user.encry_password,"teri maa ki chuut")
+          user.password= req.body.password
+          user.resetPasswordToken = undefined;
+          user.resetPasswordExpires = undefined;
+          user.save(function(err) {
+            if (err) {
+              return res.status(422).send({
+                message: err
               });
-            })
-          } else {
-              return res.json({
-                  "err":"Passwords do not match"
+            } else {
+              var data = {
+                to: user.email,
+                from: 'wefivehelper@gmail.com',
+                template: 'reset-password-email',
+                subject: 'Password Reset Confirmation',
+                context: {
+                  name: user.name.split(' ')[0]
+                }
+              };
+  
+              smtpTransport.sendMail(data, function(err,data) {
+                console.log(data,err)
+                if (!err) {
+                  return res.json({ message: 'Password reset' });
+                } else {
+                  return done(err);
+                }
               });
-          }
-        });
-      },
-      function(user, done) {
-        var smtpTransport = nodemailer.createTransport({
-          service: 'Gmail', 
-          auth: {
-            user: 'wefivehelper@gmail.com',
-            pass: 'wefive12345'
-          }
-        });
-        var mailOptions = {
-          to: user.email,
-          from: 'wefivehelper@gmail.com',
-          subject: 'Your We Five password has been changed',
-          text: 'Hello,\n\n' +
-            'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
-        };
-        smtpTransport.sendMail(mailOptions, function(err) {
-          done(err);
+            }
+          });
+        } else {
+          return res.status(422).send({
+            message: 'Passwords do not match'
+          });
+        }
+      } else {
+        return res.status(400).send({
+          message: 'Password reset token is invalid or has expired.'
         });
       }
-    ], function(err) {
-      res.json({
-          "err":"Something Went wrong mail not sent"
-      });
     });
   };
+  
+  // exports.resetPassword=(req, res)=> {
+  //     console.log("madarchod",req.params.token)
+  //   async.waterfall([
+  //     function(done) {
+  //       User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, function(err, user) {
+  //         if (!user) {
+  //           return res.redirect('back');
+  //         }
+  //         if(req.body.password == req.body.confirm) {
+  //           // user.setPassword(req.body.password, function(err) {
+  //           //   user.resetPasswordToken = undefined;
+  //           //   user.resetPasswordExpires = undefined;
+  //           user.encry_password = bcrypt.hashSync(req.body.password, 10);
+  //           user.resetPasswordToken = undefined;
+  //           user.resetPasswordExpires = undefined;
+            
+  //             user.save(function(err) {
+  //               req.logIn(user, function(err) {
+  //                 done(err, user);
+  //               });
+  //             });
+  //           }
+              
+  //          else {
+  //             return res.json({
+  //                 "err":"Passwords do not match"
+  //             });
+  //         }
+  //       });
+  //     },
+  //     function(user, done) {
+  //       var smtpTransport = nodemailer.createTransport({
+  //         service: 'Gmail', 
+  //         auth: {
+  //           user: 'wefivehelper@gmail.com',
+  //           pass: 'wefive12345'
+  //         }
+  //       });
+  //       var mailOptions = {
+  //         to: user.email,
+  //         from: 'wefivehelper@gmail.com',
+  //         subject: 'Your We Five password has been changed',
+  //         text: 'Hello,\n\n' +
+  //           'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
+  //       };
+  //       smtpTransport.sendMail(mailOptions, function(err) {
+  //         done(err);
+  //       });
+  //     }
+  //   ], function(err) {
+  //     res.json({
+  //         "err":"Something Went wrong mail not sent"
+  //     });
+  //   });
+  // };
+  
