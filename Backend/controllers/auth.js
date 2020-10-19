@@ -6,6 +6,8 @@ var crypto = require("crypto");
 var async = require('async');
 var nodemailer = require("nodemailer");
 
+const bcrypt = require('bcrypt');
+
 
 
 
@@ -137,7 +139,7 @@ exports.isSignedIn = expressJwt({
     ], function(err) {
       if (err) return next(err);
       res.json({
-          "err":"mail not sent"
+          "err":"mail  sent"
       });
     });
   };
@@ -168,17 +170,21 @@ exports.isSignedIn = expressJwt({
             return res.redirect('back');
           }
           if(req.body.password == req.body.confirm) {
-            user.setPassword(req.body.password, function(err) {
-              user.resetPasswordToken = undefined;
-              user.resetPasswordExpires = undefined;
+            // user.setPassword(req.body.password, function(err) {
+            //   user.resetPasswordToken = undefined;
+            //   user.resetPasswordExpires = undefined;
+
+              user.encry_password = bcrypt.hashSync(req.body.password, 10);
+              user.reset_password_token = undefined;
+              user.reset_password_expires = undefined;
   
               user.save(function(err) {
                 req.logIn(user, function(err) {
                   done(err, user);
                 });
               });
-            })
-          } else {
+             
+             } else {
               return res.json({
                   "err":"Passwords do not match"
               });
