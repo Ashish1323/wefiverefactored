@@ -9,7 +9,7 @@ require('dotenv').config();
 
 //my routes
 var authRoutes=require("./routes/auth")
-
+var questionRoutes=require("./routes/home")
 
   
 
@@ -25,6 +25,7 @@ app.use(cors());
 //routes
 
 app.use("/api",authRoutes);
+app.use("/api",questionRoutes);
 
 
 // DB Connection
