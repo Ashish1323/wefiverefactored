@@ -8,7 +8,7 @@ author: {
        type: mongoose.Schema.Types.ObjectId,
        ref: "User"
     },
-    username: String,   
+    name: String,   
  },
  answers:[
       {

@@ -79,10 +79,13 @@ exports.signout=(req,res)=>{
 }
 
 // protected route
-exports.isSignedIn = expressJwt({
+exports.isSignedIn = (req,res,next) =>{
+  expressJwt({
     secret:process.env.SECRET,
     userProperty:"auth"
 })
+next()
+}
 
 
 
