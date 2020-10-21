@@ -51,3 +51,7 @@ if (err) {
 
 
 }
+
+exports.createAnswers =() => {
+    console.log("yoooo!!")
+}

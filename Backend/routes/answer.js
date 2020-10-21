@@ -1,6 +1,6 @@
 let express= require("express");
 let router=express.Router();
-let {createAnswer}=require("../controllers/answer")
+let {createAnswer, createAnswers}=require("../controllers/answer")
 let {getQuestionById}=require("../controllers/question")
 
 
@@ -14,6 +14,7 @@ router.param("userId",getUserById);
 router.param("questionId",getQuestionById);
 
 router.post("/answer/:userId/:questionId",isSignedIn,createAnswer);
+router.post("/answers/:userId",isSignedIn,createAnswers);
 
 
 

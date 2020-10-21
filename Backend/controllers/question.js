@@ -52,7 +52,7 @@ exports.createQuestion =(req,res)=>{
 
   exports.getQuestionById=(req,res,next,id) => {
     Question.findById(id,(err,question)=>{
-        if(err || ! user){
+        if(err || ! question){
             return res.status(403).json({
                 error:"Unable to find question"
             })
