@@ -48,3 +48,90 @@ if (err) {
 }
 });
 }
+
+exports.getAnswerById=(req,res,next,id) => {
+    Answer.findById(id,(err,answer)=>{
+        if(err || ! answer){
+            return res.status(403).json({
+                error:"Unable to find question"
+            })
+        }
+        req.answer = answer;
+        next();
+    })
+}
+
+
+
+// edit answer
+exports.updateAnswer=(req,res)=>{
+    var ans= req.body.answer;
+    
+    Answer.findByIdAndUpdate(req.answer._id,{answer:ans},function(err,answer){
+    if(err){
+        console.log(err);
+        res.json({
+            err:"error in updation"
+        })
+    }
+    else{
+        res.json({
+            msg:"updated Successfully"
+        });
+    }
+    
+    })
+    
+    
+    }
+
+    exports.deleteAnswer=(req,res)=>{
+     
+        Answer.findById(req.answer._id).populate("question").exec(function(err,answer){
+           if(err){
+               console.log(err);
+           }
+
+           else{
+               
+
+               Array.prototype.remove = function() {
+                var what, a = arguments, L = a.length, ax;
+                while (L && this.length) {
+                    what = a[--L];
+                    while ((ax = this.indexOf(what)) !== -1) {
+                        this.splice(ax, 1);
+                    }
+                }
+                return this;
+            };
+                        
+            answer.question[0].answers.remove(req.params.id);
+
+            console.log(answer.question[0].answers);
+        
+          
+            Question.findByIdAndUpdate({_id:answer.question[0]._id},{answers:answer.question[0].answers},function(err,res){
+                if(err){
+                    console.log(err);
+                }
+                else{
+                    console.log(res);
+                }
+            });
+            Answer.findByIdAndRemove(req.answer._id, function(err){
+                if (err) {
+                    res.json({
+                        err:"deletion error"
+                    });
+                } else {
+                    res.json({
+                        msg:"Deleted Successfully"
+                    });
+                }
+            });
+           }
+
+        })
+        
+    }
