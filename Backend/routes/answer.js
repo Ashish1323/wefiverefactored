@@ -14,7 +14,6 @@ router.param("userId",getUserById);
 router.param("questionId",getQuestionById);
 
 router.post("/answer/:userId/:questionId",isSignedIn,createAnswer);
-router.post("/answers/:userId",isSignedIn,createAnswers);
 
 
 

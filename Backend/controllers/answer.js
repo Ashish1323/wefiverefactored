@@ -4,8 +4,7 @@ const Question = require("../models/question")
 const Answer = require("../models/answer")
 
 exports.createAnswer=(req,res) =>{
-    console.log(":ODE",req.question)
-    console.log(req.user)
+   
            
 //     var ans=req.body.answer;
   
@@ -48,10 +47,4 @@ if (err) {
     });
 }
 });
-
-
-}
-
-exports.createAnswers =() => {
-    console.log("yoooo!!")
 }

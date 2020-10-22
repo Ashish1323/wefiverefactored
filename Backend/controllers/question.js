@@ -61,3 +61,20 @@ exports.createQuestion =(req,res)=>{
         next();
     })
 }
+
+// delete of question
+
+exports.deleteQuestion=(req,res)=>{
+    Question.findByIdAndRemove(req.question._id, function(err){
+        if (err) {
+            res.json({
+                error:"unable to delete the answer"
+            });
+        } else {
+            res.json({
+                message:"deleted succesfully"
+            });
+        }
+    });
+}
+

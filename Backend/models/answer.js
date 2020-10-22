@@ -2,7 +2,8 @@ var mongoose = require("mongoose");
 
 
 AnswerSchema=new mongoose.Schema({
-answer:String,
+   count:Number,
+   answer:String,
 author: {
    id: {
       type: mongoose.Schema.Types.ObjectId,
@@ -16,7 +17,6 @@ question:[{
 }],
 likes: [],
 dislikes: []
-
 });
 
 
